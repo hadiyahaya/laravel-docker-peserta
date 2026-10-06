@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8080"
+    volumes:
+      - .:/var/www/html
+      - app_node_modules:/var/www/html/node_modules
+      - app_public_build:/var/www/html/public/build
+    environment:
+      HEALTHCHECK_PATH: /up
+    depends_on:
+      mariadb:
+        condition: service_healthy
+  mariadb:
+    image: mariadb:11.4
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MARIADB_DATABASE: ${DB_DATABASE:-laravel_intermediate}
+      MARIADB_USER: ${DB_USERNAME:-root}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-root}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+    mariadb-data:
+    app_node_modules:
+    app_public_build:
