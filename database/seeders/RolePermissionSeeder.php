@@ -25,13 +25,13 @@ class RolePermissionSeeder extends Seeder
             'delete-users',
         ];
 
-        // Clear the cache again so the new permissions can be found by name.
-        // (DatabaseSeeder uses WithoutModelEvents, which stops Spatie clearing it automatically.)
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission);
         }
+
+        // Clear the cache again so the new permissions can be found by name.
+        // (DatabaseSeeder uses WithoutModelEvents, which stops Spatie clearing it automatically.)
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         Role::findOrCreate('super-admin')->syncPermissions($permissions);
 
